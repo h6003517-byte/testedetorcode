@@ -3,167 +3,353 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeLab - Interactive Playground</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>CodeLab - مختبر البرمجة التفاعلي</title>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --bg-primary: #1e1e2e;
             --bg-secondary: #181825;
             --bg-tertiary: #11111b;
-            --bg-editor: #1a1b26;
-            --bg-preview: #ffffff;
             --text-primary: #cdd6f4;
-            --text-secondary: #a6adc8;
-            --text-muted: #6c7086;
+            --text-secondary: #6c7086;
             --accent-blue: #89b4fa;
-            --accent-purple: #cba6f7;
             --accent-green: #a6e3a1;
             --accent-red: #f38ba8;
             --accent-yellow: #f9e2af;
             --border-color: #313244;
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; overflow: hidden; }
-        body { font-family: 'Tajawal', sans-serif; background: var(--bg-primary); color: var(--text-primary); }
-        .app-container { display: flex; flex-direction: column; height: 100vh; width: 100vw; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
         
-        /* Header */
-        .header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); border-bottom: 1px solid var(--border-color); height: 60px; flex-shrink: 0; }
-        .header-right, .header-left { display: flex; align-items: center; gap: 16px; }
-        .logo { display: flex; align-items: center; gap: 10px; }
-        .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; color: var(--bg-primary); }
-        .logo-text { font-size: 20px; font-weight: 700; background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .file-name { display: flex; align-items: center; gap: 8px; padding: 6px 14px; background: var(--bg-tertiary); border-radius: 6px; font-size: 13px; color: var(--text-secondary); border: 1px solid var(--border-color); }
-        .status-indicator { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--bg-tertiary); border-radius: 20px; font-size: 12px; border: 1px solid var(--border-color); }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-green); animation: pulse 2s infinite; }
-        .status-dot.error { background: var(--accent-red); animation: none; }
-        .status-dot.compiling { background: var(--accent-yellow); animation: spin 1s linear infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.2); } }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--bg-primary);
+        }
+        .logo-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .status {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            background: var(--bg-tertiary);
+            color: var(--accent-green);
+        }
+        .status.error { color: var(--accent-red); }
+        .status.compiling { color: var(--accent-yellow); }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: var(--accent-blue);
+            color: var(--bg-primary);
+        }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        .btn-secondary:hover { background: var(--border-color); }
         
-        /* Buttons */
-        .btn { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border: none; border-radius: 8px; font-family: 'Tajawal', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s; }
-        .btn svg { width: 16px; height: 16px; }
-        .btn-primary { background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%); color: var(--bg-primary); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(137, 180, 250, 0.4); }
-        .btn-secondary { background: var(--bg-tertiary); color: var(--text-secondary); border: 1px solid var(--border-color); }
-        .btn-secondary:hover { background: var(--border-color); color: var(--text-primary); }
+        .workspace {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        .panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .panel-header {
+            background: var(--bg-secondary);
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .code-type {
+            background: var(--bg-tertiary);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: var(--accent-blue);
+        }
+        .editor-container {
+            flex: 1;
+            display: flex;
+            background: var(--bg-tertiary);
+            overflow: hidden;
+        }
+        .line-numbers {
+            padding: 16px 8px;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            text-align: right;
+            user-select: none;
+            min-width: 50px;
+            border-left: 1px solid var(--border-color);
+        }
+        .editor {
+            flex: 1;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: none;
+            outline: none;
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: none;
+            direction: ltr;
+            text-align: left;
+            white-space: pre;
+            overflow: auto;
+        }
+        .preview-container {
+            flex: 1;
+            background: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+        .preview-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(30, 30, 46, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: var(--text-primary);
+            z-index: 10;
+        }
+        .preview-loading.hidden { display: none; }
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .preview-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+        }
         
-        /* Workspace */
-        .workspace { display: flex; flex: 1; overflow: hidden; }
-        .editor-panel, .preview-panel { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-        .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
-        .panel-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--text-secondary); }
-        .panel-badge { padding: 2px 8px; background: var(--bg-tertiary); border-radius: 4px; font-size: 10px; color: var(--text-muted); border: 1px solid var(--border-color); }
+        .error-box {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--accent-red);
+            border-radius: 12px;
+            padding: 16px;
+            z-index: 100;
+            display: none;
+        }
+        .error-box.visible { display: block; }
+        .error-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .error-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent-red);
+            font-weight: 600;
+        }
+        .error-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        .error-content {
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+            padding: 12px;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow: auto;
+        }
         
-        /* Editor */
-        .editor-container { flex: 1; display: flex; background: var(--bg-editor); overflow: hidden; }
-        .line-numbers { padding: 16px 12px; background: var(--bg-secondary); color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.6; text-align: right; user-select: none; overflow: hidden; min-width: 50px; border-left: 1px solid var(--border-color); }
-        .code-editor { flex: 1; padding: 16px; background: var(--bg-editor); border: none; outline: none; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.6; resize: none; overflow: auto; direction: ltr; text-align: left; caret-color: var(--accent-blue); }
-        .code-editor::placeholder { color: var(--text-muted); }
+        .notification {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent-green);
+            color: var(--bg-primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            z-index: 200;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .notification.visible { opacity: 1; }
         
-        /* Preview */
-        .preview-container { flex: 1; background: var(--bg-preview); position: relative; overflow: hidden; }
-        .preview-iframe { width: 100%; height: 100%; border: none; background: var(--bg-preview); }
-        .preview-loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 16px; color: var(--text-muted); }
-        .spinner { width: 40px; height: 40px; border: 3px solid var(--border-color); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 1s linear infinite; }
-        
-        /* Error Box */
-        .error-box { position: fixed; bottom: 20px; right: 20px; width: 400px; max-height: 300px; background: var(--bg-secondary); border: 1px solid var(--accent-red); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); z-index: 1000; display: none; }
-        .error-box.visible { display: block; animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .error-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: rgba(243, 139, 168, 0.1); border-bottom: 1px solid var(--accent-red); }
-        .error-title { display: flex; align-items: center; gap: 8px; color: var(--accent-red); font-weight: 600; font-size: 14px; }
-        .error-close { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 4px; transition: all 0.3s; }
-        .error-close:hover { background: var(--bg-tertiary); color: var(--text-primary); }
-        .error-content { padding: 16px; max-height: 220px; overflow-y: auto; }
-        .error-message { color: var(--text-primary); font-size: 13px; margin-bottom: 12px; font-family: 'JetBrains Mono', monospace; word-break: break-word; }
-        .error-location { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--bg-tertiary); border-radius: 6px; font-size: 12px; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; }
-        .error-stack { margin-top: 12px; padding: 12px; background: var(--bg-tertiary); border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); overflow-x: auto; white-space: pre-wrap; word-break: break-all; }
-        
-        /* Resizer */
-        .resizer { width: 6px; background: var(--bg-tertiary); cursor: col-resize; flex-shrink: 0; }
+        .resizer {
+            width: 6px;
+            background: var(--border-color);
+            cursor: col-resize;
+            transition: background 0.2s;
+        }
         .resizer:hover { background: var(--accent-blue); }
         
-        /* Console */
-        .console-toggle { position: fixed; bottom: 20px; left: 20px; z-index: 999; }
-        .console-panel { position: fixed; bottom: 70px; left: 20px; width: 500px; max-height: 300px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); z-index: 998; display: none; }
-        .console-panel.visible { display: block; }
-        .console-content { padding: 12px; max-height: 250px; overflow-y: auto; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
-        .console-item { padding: 8px 12px; margin-bottom: 4px; border-radius: 4px; background: var(--bg-tertiary); }
-        .console-item.log { border-right: 3px solid var(--accent-blue); }
-        .console-item.warn { border-right: 3px solid var(--accent-yellow); color: var(--accent-yellow); }
-        .console-item.error { border-right: 3px solid var(--accent-red); color: var(--accent-red); }
+        .console-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            z-index: 50;
+        }
+        .console-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            display: none;
+            flex-direction: column;
+            z-index: 100;
+        }
+        .console-panel.visible { display: flex; }
+        .console-header {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .console-content {
+            flex: 1;
+            overflow: auto;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        .console-line {
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+        }
+        .console-line.error { background: rgba(243, 139, 168, 0.2); color: var(--accent-red); }
+        .console-line.warn { background: rgba(249, 226, 175, 0.2); color: var(--accent-yellow); }
+        .console-line.info { color: var(--accent-blue); }
         
-        /* Notification */
-        .notification { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); padding: 12px 24px; background: var(--bg-secondary); border: 1px solid var(--accent-green); border-radius: 8px; color: var(--text-primary); font-size: 14px; z-index: 1001; display: none; }
-        .notification.visible { display: block; }
-        
-        /* Responsive */
         @media (max-width: 768px) {
             .workspace { flex-direction: column; }
+            .panel { min-height: 300px; }
             .resizer { width: 100%; height: 6px; cursor: row-resize; }
-            .header { padding: 10px 12px; }
-            .logo-text, .file-name, .status-text { display: none; }
-            .btn span { display: none; }
-            .btn { padding: 8px 12px; }
         }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <header class="header">
-            <div class="header-right">
-                <div class="logo">
-                    <div class="logo-icon">CL</div>
-                    <span class="logo-text">CodeLab</span>
-                </div>
-                <div class="file-name">
-                    <span id="fileName">App.tsx</span>
-                </div>
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">CL</div>
+            <span class="logo-text">CodeLab</span>
+        </div>
+        <div class="header-actions">
+            <span class="status" id="status">جاهز</span>
+            <button class="btn btn-secondary" id="resetBtn">إعادة تعيين</button>
+            <button class="btn btn-primary" id="runBtn">تشغيل</button>
+        </div>
+    </header>
+    
+    <div class="workspace">
+        <div class="panel" id="editorPanel">
+            <div class="panel-header">
+                <span>المحرر</span>
+                <span class="code-type" id="codeType">JavaScript</span>
             </div>
-            <div class="header-left">
-                <div class="status-indicator">
-                    <div class="status-dot" id="statusDot"></div>
-                    <span id="statusText">جاهز</span>
-                </div>
-                <button class="btn btn-secondary" id="resetBtn" title="إعادة تعيين">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
-                    <span>إعادة تعيين</span>
-                </button>
-                <button class="btn btn-primary" id="runBtn" title="تشغيل">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                    <span>تشغيل</span>
-                </button>
+            <div class="editor-container">
+                <div class="line-numbers" id="lineNumbers">1</div>
+                <textarea class="editor" id="editor" spellcheck="false" placeholder="اكتب كودك هنا..."></textarea>
             </div>
-        </header>
-        <div class="workspace">
-            <div class="editor-panel">
-                <div class="panel-header">
-                    <div class="panel-title">المحرر</div>
-                    <span class="panel-badge" id="codeTypeBadge">TypeScript + React</span>
-                </div>
-                <div class="editor-container">
-                    <div class="line-numbers" id="lineNumbers">1</div>
-                    <textarea class="code-editor" id="codeEditor" spellcheck="false" placeholder="اكتب كودك هنا..." dir="ltr"></textarea>
-                </div>
+        </div>
+        
+        <div class="resizer" id="resizer"></div>
+        
+        <div class="panel" id="previewPanel">
+            <div class="panel-header" style="background:#fff;color:#333;">
+                <span>المعاينة</span>
+                <span class="code-type" id="previewType">Output</span>
             </div>
-            <div class="resizer" id="resizer"></div>
-            <div class="preview-panel">
-                <div class="panel-header">
-                    <div class="panel-title">المعاينة</div>
-                    <span class="panel-badge" id="codeType">React + TSX</span>
+            <div class="preview-container">
+                <div class="preview-loading hidden" id="previewLoading">
+                    <div class="spinner"></div>
+                    <span>جاري التحميل...</span>
                 </div>
-                <div class="preview-container">
-                    <div class="preview-loading" id="previewLoading">
-                        <div class="spinner"></div>
-                        <span>جاري التحميل...</span>
-                    </div>
-                    <iframe class="preview-iframe" id="previewFrame" sandbox="allow-scripts allow-forms allow-modals"></iframe>
-                </div>
+                <iframe class="preview-iframe" id="previewFrame" sandbox="allow-scripts allow-forms allow-modals"></iframe>
             </div>
         </div>
     </div>
@@ -171,449 +357,210 @@
     <div class="error-box" id="errorBox">
         <div class="error-header">
             <div class="error-title">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <span>✕</span>
                 <span id="errorTitle">خطأ</span>
             </div>
-            <button class="error-close" id="errorClose">✕</button>
+            <button class="error-close" id="errorClose">×</button>
         </div>
-        <div class="error-content">
-            <div class="error-message" id="errorMessage"></div>
-            <div class="error-location" id="errorLocation">
-                <span id="errorLocationText"></span>
-            </div>
-            <div class="error-stack" id="errorStack"></div>
-        </div>
+        <div class="error-content" id="errorContent"></div>
     </div>
-
-    <button class="btn btn-secondary console-toggle" id="consoleToggle">Console</button>
+    
+    <div class="notification" id="notification"></div>
+    
+    <button class="console-toggle" id="consoleToggle">Console</button>
     <div class="console-panel" id="consolePanel">
-        <div class="panel-header">
-            <div class="panel-title">Console Output</div>
+        <div class="console-header">
+            <span>Console Output</span>
+            <button class="error-close" id="consoleClose">×</button>
         </div>
         <div class="console-content" id="consoleContent"></div>
     </div>
-    <div class="notification" id="notification"></div>
-
-<script>
-(function() {
-    'use strict';
-
-    var CONFIG = {
-        DEBOUNCE_DELAY: 800,
-        CDN_BABEL: 'https://unpkg.com/@babel/standalone@7.23.5/babel.min.js'
-    };
-
-    var DEFAULT_CODE = '' +
-        '// CodeLab Interactive Playground\n' +
-        '// JavaScript Demo\n' +
-        '\n' +
-        'let count = 0;\n' +
-        'document.body.style.cssText = "text-align:center;padding:40px;font-family:system-ui;background:#1e1e2e;min-height:100vh;margin:0";\n' +
-        '\n' +
-        'const container = document.createElement("div");\n' +
-        'document.body.appendChild(container);\n' +
-        '\n' +
-        'function updateDisplay() {\n' +
-        '  container.innerHTML = "\n' +
-        '    <h1 style=\"color:#89b4fa;margin-bottom:20px;font-size:2rem;\">CodeLab Counter</h1>\n' +
-        '    <div style=\"font-size:5rem;font-weight:bold;color:#fff;font-family:monospace;margin:20px 0;\">' + count + '</div>\n' +
-        '    <div style=\"display:flex;gap:10px;justify-content:center;\">\n' +
-        '      <button onclick=\"decrement()\" style=\"width:60px;height:60px;font-size:1.5rem;border-radius:12px;border:1px solid #f38ba8;background:rgba(243,139,168,0.2);color:#f38ba8;cursor:pointer;\">-</button>\n' +
-        '      <button onclick=\"reset()\" style=\"width:60px;height:60px;font-size:1.5rem;border-radius:12px;border:1px solid #6c7086;background:rgba(108,112,134,0.2);color:#6c7086;cursor:pointer;\">Reset</button>\n' +
-        '      <button onclick=\"increment()\" style=\"width:60px;height:60px;font-size:1.5rem;border-radius:12px;border:1px solid #a6e3a1;background:rgba(166,227,161,0.2);color:#a6e3a1;cursor:pointer;\">+</button>\n' +
-        '    </div>\n' +
-        '    <p style=\"color:#6c7086;margin-top:30px;\">Plain JavaScript Demo</p>\n' +
-        '  ";\n' +
-        '}\n' +
-        '\n' +
-        'function increment() {\n' +
-        '  count++;\n' +
-        '  updateDisplay();\n' +
-        '  console.log("Count:", count);\n' +
-        '}\n' +
-        '\n' +
-        'function decrement() {\n' +
-        '  count--;\n' +
-        '  updateDisplay();\n' +
-        '  console.log("Count:", count);\n' +
-        '}\n' +
-        '\n' +
-        'function reset() {\n' +
-        '  count = 0;\n' +
-        '  updateDisplay();\n' +
-        '  console.log("Counter reset");\n' +
-        '}\n' +
-        '\n' +
-        'updateDisplay();\n' +
-        'console.log("CodeLab Playground initialized!");';
-
-    // UI Engine
-    var UI = {
-        els: {},
-        init: function() {
-            this.els = {
-                editor: document.getElementById('codeEditor'),
-                lines: document.getElementById('lineNumbers'),
-                iframe: document.getElementById('previewFrame'),
-                loading: document.getElementById('previewLoading'),
-                runBtn: document.getElementById('runBtn'),
-                resetBtn: document.getElementById('resetBtn'),
-                statusDot: document.getElementById('statusDot'),
-                statusText: document.getElementById('statusText'),
-                errorBox: document.getElementById('errorBox'),
-                errorClose: document.getElementById('errorClose'),
-                errorTitle: document.getElementById('errorTitle'),
-                errorMessage: document.getElementById('errorMessage'),
-                errorLocationText: document.getElementById('errorLocationText'),
-                errorStack: document.getElementById('errorStack'),
-                consoleToggle: document.getElementById('consoleToggle'),
-                consolePanel: document.getElementById('consolePanel'),
-                consoleContent: document.getElementById('consoleContent'),
-                notification: document.getElementById('notification'),
-                codeType: document.getElementById('codeType'),
-                codeTypeBadge: document.getElementById('codeTypeBadge')
-            };
-            this.setupResizer();
-            this.els.errorClose.onclick = function() { UI.hideError(); };
-            this.els.consoleToggle.onclick = function() { 
-                UI.els.consolePanel.classList.toggle('visible'); 
-            };
-        },
-        setupResizer: function() {
-            var resizer = document.getElementById('resizer');
-            var isResizing = false;
-            var self = this;
-            resizer.addEventListener('mousedown', function() {
-                isResizing = true;
-                document.body.style.cursor = 'col-resize';
-                document.body.style.userSelect = 'none';
-            });
-            document.addEventListener('mousemove', function(e) {
-                if (!isResizing) return;
-                var workspace = document.querySelector('.workspace');
-                var rect = workspace.getBoundingClientRect();
-                var pct = Math.max(20, Math.min(80, ((e.clientX - rect.left) / rect.width) * 100));
-                document.querySelector('.editor-panel').style.flex = '0 0 ' + pct + '%';
-                document.querySelector('.preview-panel').style.flex = '0 0 ' + (100 - pct) + '%';
-            });
-            document.addEventListener('mouseup', function() {
-                isResizing = false;
-                document.body.style.cursor = '';
-                document.body.style.userSelect = '';
-            });
-        },
-        updateLines: function() {
-            var lines = this.els.editor.value.split('\n').length;
-            var html = '';
-            for (var i = 1; i <= lines; i++) { html = html + i + '\n'; }
-            this.els.lines.textContent = html;
-            this.els.lines.scrollTop = this.els.editor.scrollTop;
-        },
-        setStatus: function(status, text) {
-            this.els.statusDot.className = 'status-dot';
-            if (status === 'error') this.els.statusDot.classList.add('error');
-            else if (status === 'compiling') this.els.statusDot.classList.add('compiling');
-            this.els.statusText.textContent = text || 'جاهز';
-        },
-        showError: function(title, message, location, stack) {
-            this.els.errorTitle.textContent = title || 'خطأ';
-            this.els.errorMessage.textContent = message || '';
-            this.els.errorLocationText.textContent = location || '';
-            this.els.errorStack.textContent = stack || '';
-            this.els.errorBox.classList.add('visible');
-            this.setStatus('error', 'خطأ');
-        },
-        hideError: function() { this.els.errorBox.classList.remove('visible'); },
-        showNotification: function(msg) {
-            this.els.notification.textContent = msg;
-            this.els.notification.classList.add('visible');
-            var self = this;
-            setTimeout(function() { self.els.notification.classList.remove('visible'); }, 3000);
-        },
-        showLoading: function() { this.els.loading.style.display = 'flex'; },
-        hideLoading: function() { this.els.loading.style.display = 'none'; },
-        updateCodeType: function(type) {
-            this.els.codeType.textContent = type;
-            this.els.codeTypeBadge.textContent = type;
-        }
-    };
-
-    // Analyzer Engine
-    var Analyzer = {
-        detect: function(code) {
-            var t = {
-                isHTML: /^<!DOCTYPE|^<html|^<head|^<body/.test(code.trim()),
-                isCSS: /^[.#][\w-]+\s*\{[\s\S]*\}$/m.test(code) || /@media|@keyframes/.test(code),
-                isJSX: /<[A-Z][a-zA-Z]*[^>]*>|return\s*[\(<]/.test(code),
-                isTS: /:\s*(string|number|boolean|any|void|never)/.test(code),
-                isReact: /useState|useEffect|useMemo|useCallback|React\./.test(code) || /<[A-Z]/.test(code),
-                hasImport: /import\s+.*\s+from\s+['"]/.test(code),
-                hasExport: /export\s+default/.test(code),
-                hasHook: /useState|useEffect|useMemo|useCallback|useRef|useContext|useReducer/.test(code),
-                usesTailwind: /className=["'][^"']*(?:bg-|text-|flex-|p-|m-)/.test(code)
-            };
-            t.isTSX = t.isTS && t.isJSX;
-            t.isJSX = t.isJSX || t.isReact;
-            return t;
-        },
-        getType: function(t, code) {
-            if (t.isTSX) return 'TSX';
-            if (t.isTS && t.isJSX) return 'TSX';
-            if (t.isTS) return 'TypeScript';
-            if (t.isJSX) return 'JSX';
-            if (t.isReact) return 'React';
-            if (t.isHTML) return 'HTML';
-            if (t.isCSS) return 'CSS';
-            if (/function|const|let|var|=>/.test(code)) return 'JavaScript';
-            return 'Unknown';
-        }
-    };
-
-    // Babel Engine - Load in main page to avoid cross-origin issues
-    var Babel = {
-        loaded: false,
-        loading: false,
-        callbacks: [],
-        load: function(cb) {
-            if (this.loaded) { cb(); return; }
-            this.callbacks.push(cb);
-            if (this.loading) return;
-            this.loading = true;
-            var s = document.createElement('script');
-            s.src = CONFIG.CDN_BABEL;
-            var self = this;
-            s.onload = function() {
-                self.loaded = true;
-                self.loading = false;
-                for (var i = 0; i < self.callbacks.length; i++) self.callbacks[i]();
-                self.callbacks = [];
-            };
-            s.onerror = function(e) { 
-                self.loading = false;
-                cb({ error: 'Failed to load Babel: ' + (e.message || 'Network error') }); 
-            };
-            document.head.appendChild(s);
-        },
-        transform: function(code, presets) {
-            if (!this.loaded) {
-                return { success: false, error: { message: 'Babel not loaded yet' } };
-            }
-            try {
-                var result = window.Babel.transform(code, { presets: presets || ['react', 'typescript'] });
-                return { success: true, code: result.code };
-            } catch (e) {
-                return { success: false, error: { message: e.message, line: e.loc ? e.loc.line : null } };
-            }
-        }
-    };
     
-    // Pre-load Babel when page loads
-    Babel.load(function() { console.log('Babel loaded'); });
-
-    // Code Cleaner
-    var Cleaner = {
-        clean: function(code) {
-            var cleaned = code
-                .replace(/^import\s+.*from\s+['"][^'"]+['"];?\s*/gim, '')
-                .replace(/^export\s+default\s+(function|const|class)\s+/gm, '$1 ')
-                .replace(/^export\s+(default\s+)?/gm, '')
-                .replace(/ReactDOM\.render\s*\([^,]+,\s*[^)]+\)\s*;?/g, '')
-                .replace(/createRoot\s*\([^)]+\)\.render\s*\([^)]+\)\s*;?/gi, '')
-                .replace(/^\s*\/\/[^\n]*/gm, '');
-            
-            // Add React hooks declarations if needed
-            var hooks = [];
-            if (/useState/.test(cleaned)) hooks.push('useState');
-            if (/useEffect/.test(cleaned)) hooks.push('useEffect');
-            if (/useMemo/.test(cleaned)) hooks.push('useMemo');
-            if (/useCallback/.test(cleaned)) hooks.push('useCallback');
-            if (/useRef/.test(cleaned)) hooks.push('useRef');
-            if (/useContext/.test(cleaned)) hooks.push('useContext');
-            if (/useReducer/.test(cleaned)) hooks.push('useReducer');
-            
-            if (hooks.length > 0) {
-                cleaned = 'const {' + hooks.join(',') + '} = React;' + '\n\n' + cleaned;
-            }
-            
-            return cleaned;
+    <script>
+        var DEFAULT_CODE = '// CodeLab Interactive Playground\n// JavaScript Demo\n\nvar count = 0;\n\ndocument.body.style.cssText = "text-align:center;padding:40px;font-family:system-ui;background:linear-gradient(135deg,#1e1e2e,#313244);min-height:100vh;margin:0";\n\nvar h1 = document.createElement("h1");\nh1.textContent = "CodeLab Counter";\nh1.style.cssText = "color:#89b4fa;font-size:2rem;margin-bottom:30px";\ndocument.body.appendChild(h1);\n\nvar display = document.createElement("div");\ndisplay.style.cssText = "font-size:6rem;font-weight:bold;color:#fff;font-family:monospace;margin:20px 0";\ndisplay.textContent = "0";\ndocument.body.appendChild(display);\n\nvar buttons = document.createElement("div");\nbuttons.style.cssText = "display:flex;gap:15px;justify-content:center";\ndocument.body.appendChild(buttons);\n\nfunction makeButton(text, color, onClick) {\n    var btn = document.createElement("button");\n    btn.textContent = text;\n    btn.style.cssText = "width:60px;height:60px;font-size:1.5rem;border-radius:12px;border:1px solid " + color + ";background:rgba(0,0,0,0.2);color:" + color + ";cursor:pointer";\n    btn.onclick = onClick;\n    return btn;\n}\n\nbuttons.appendChild(makeButton("-", "#f38ba8", function() { count--; update(); }));\nbuttons.appendChild(makeButton("0", "#6c7086", function() { count = 0; update(); }));\nbuttons.appendChild(makeButton("+", "#a6e3a1", function() { count++; update(); }));\n\nfunction update() {\n    display.textContent = count;\n    console.log("Count:", count);\n}\n\nupdate();\nconsole.log("CodeLab Playground initialized!");';
+        
+        var editor = document.getElementById("editor");
+        var lineNumbers = document.getElementById("lineNumbers");
+        var previewFrame = document.getElementById("previewFrame");
+        var previewLoading = document.getElementById("previewLoading");
+        var statusEl = document.getElementById("status");
+        var codeTypeEl = document.getElementById("codeType");
+        var errorBox = document.getElementById("errorBox");
+        var errorContent = document.getElementById("errorContent");
+        var notification = document.getElementById("notification");
+        var consoleContent = document.getElementById("consoleContent");
+        
+        function updateLines() {
+            var lines = editor.value.split("\n");
+            var nums = [];
+            for (var i = 1; i <= lines.length; i++) nums.push(i);
+            lineNumbers.textContent = nums.join("\n");
         }
-    };
-
-    // Auto Wrapper
-    var Wrapper = {
-        needs: function(code, type) {
-            if (type.hasExport) return false;
-            if (/function\s+\w+/.test(code)) return false;
-            if (type.isReact || type.isJSX) return true;
-            return false;
-        },
-        wrap: function(code, type) {
-            var hooks = [];
-            if (type.hasHook) {
-                if (/useState/.test(code)) hooks.push('useState');
-                if (/useEffect/.test(code)) hooks.push('useEffect');
-                if (/useMemo/.test(code)) hooks.push('useMemo');
-                if (/useCallback/.test(code)) hooks.push('useCallback');
-                if (/useRef/.test(code)) hooks.push('useRef');
-                if (/useContext/.test(code)) hooks.push('useContext');
-                if (/useReducer/.test(code)) hooks.push('useReducer');
-            }
-            var hookDecl = hooks.length ? 'const {' + hooks.join(',') + '} = React;\n  ' : '';
-            return 'function App() {\n  ' + hookDecl + code + '\n}';
+        
+        function showNotification(msg) {
+            notification.textContent = msg;
+            notification.classList.add("visible");
+            setTimeout(function() { notification.classList.remove("visible"); }, 2000);
         }
-    };
-
-    // Preview Engine
-    var Preview = {
-        update: function(code) {
-            var self = this;
-            UI.setStatus('compiling', 'جاري الترجمة...');
-            UI.showLoading();
-            UI.hideError();
-
-            var type = Analyzer.detect(code);
-            UI.updateCodeType(Analyzer.getType(type, code));
-
-            var cleaned = Cleaner.clean(code);
+        
+        function showError(msg) {
+            errorContent.textContent = msg;
+            errorBox.classList.add("visible");
+        }
+        
+        function hideError() {
+            errorBox.classList.remove("visible");
+        }
+        
+        function setStatus(text) {
+            statusEl.textContent = text;
+            statusEl.className = "status";
+        }
+        
+        function showLoading() { previewLoading.classList.remove("hidden"); }
+        function hideLoading() { previewLoading.classList.add("hidden"); }
+        
+        function updatePreview() {
+            hideError();
+            setStatus("جاري الترجمة...");
+            showLoading();
             
-            if (Wrapper.needs(cleaned, type)) {
-                cleaned = Wrapper.wrap(cleaned, type);
-            }
-
-            if (type.isReact || type.isJSX || type.isTSX) {
-                // Ensure Babel is loaded before transforming
-                if (!Babel.loaded) {
-                    Babel.load(function() {
-                        self.compileAndRender(cleaned, type);
-                    });
-                } else {
-                    this.compileAndRender(cleaned, type);
-                }
-            } else {
-                this.render(cleaned, type);
-            }
-        },
-        compileAndRender: function(code, type) {
-            var presets = ['react'];
-            if (type.isTS || type.isTSX) presets.push('typescript');
-            var result = Babel.transform(code, presets);
-            if (!result.success) {
-                this.showError(result.error);
-                return;
-            }
-            this.render(result.code, type);
-        },
-        render: function(compiledCode, type) {
-            var html = this.buildHTML(compiledCode, type);
-            var iframe = UI.els.iframe;
+            var code = editor.value;
+            var type = "JavaScript";
+            if (code.indexOf("<html") !== -1 || code.indexOf("<div") !== -1) type = "HTML";
+            codeTypeEl.textContent = type;
             
             try {
-                iframe.srcdoc = html;
-            } catch(e) {
-                this.showError({ message: 'Failed to render preview' });
-                return;
+                var html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"></head><body style=\"margin:0\">";
+                html += "<div id=\"app\"></div>";
+                html += "<script>var app = document.getElementById(\"app\");";
+                html += "try { " + code + " } catch(e) { ";
+                html += "app.innerHTML = '<div style=\"padding:20px;background:#fee2e2;border:1px solid #ef4444;border-radius:8px;font-family:system-ui\"><h2>Error</h2><p>' + e.message + '</p></div>'; console.error(e); ";
+                html += "}</" + "script></body></html>";
+                previewFrame.srcdoc = html;
+                
+                setTimeout(function() {
+                    hideLoading();
+                    setStatus("جاهز");
+                }, 100);
+            } catch (e) {
+                hideLoading();
+                setStatus("خطأ");
+                showError(e.message);
             }
-            
-            // Hide loading and set status
-            setTimeout(function() {
-                UI.hideLoading();
-                UI.setStatus('ready', 'جاهز');
-            }, 1000);
-        },
-        buildHTML: function(code, type) {
-            var html = '<!DOCTYPE html><html lang="ar"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body style="margin:0;font-family:system-ui;">';
-            
-            if (type.isReact || type.isJSX || type.isTSX) {
-                html = html + '<div style="padding:20px;background:#1e1e2e;color:#cdd6f4;min-height:100vh"><h2 style="color:#89b4fa">React/JSX/TSX</h2><p>Use plain HTML/CSS/JavaScript for best results.</p></div>';
-            } else {
-                html = html + '<div id="root"></div>';
-                html = html + '<script>' + code + '</script>';
-            }
-            
-            html = html + '</body></html>';
-            
-            return html;
-        },
-        showError: function(err) {
-            UI.hideLoading();
-            UI.setStatus('error', 'خطأ');
-            var msg = err.message || JSON.stringify(err);
-            UI.showError('خطأ', msg, '', '');
-            
-            var iframe = UI.els.iframe;
-            var errorHTML = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;font-family:system-ui;padding:20px;background:#1e1e2e;color:#cdd6f4"><div style="padding:20px;background:rgba(243,139,168,0.1);border:1px solid #f38ba8;border-radius:12px"><h2 style="color:#f38ba8">Compilation Error</h2><p>' + this.escHtml(msg) + '</p></div></body></html>';
-            try {
-                iframe.srcdoc = errorHTML;
-            } catch(e) {}
-        },
-        escHtml: function(t) {
-            return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
-    };
-
-    // Auto Update Engine
-    var AutoUpdate = {
-        timer: null,
-        init: function() {
-            var self = this;
-            UI.els.editor.addEventListener('input', function() {
-                UI.updateLines();
-                self.schedule();
-            });
-            UI.els.editor.addEventListener('scroll', function() {
-                UI.updateLines();
-            });
-            UI.els.editor.addEventListener('keydown', function(e) {
-                if (e.key === 'Tab') {
-                    e.preventDefault();
-                    var s = this.selectionStart, en = this.selectionEnd;
-                    this.value = this.value.substring(0, s) + '  ' + this.value.substring(en);
-                    this.selectionStart = this.selectionEnd = s + 2;
-                    self.schedule();
-                }
-            });
-        },
-        schedule: function() {
-            clearTimeout(this.timer);
-            var self = this;
-            this.timer = setTimeout(function() {
-                Preview.update(UI.els.editor.value);
-            }, CONFIG.DEBOUNCE_DELAY);
-        },
-        run: function() {
-            clearTimeout(this.timer);
-            Preview.update(UI.els.editor.value);
+        
+        // Console capture
+        var origLog = console.log;
+        var origError = console.error;
+        console.log = function() {
+            var div = document.createElement("div");
+            div.className = "console-line info";
+            div.textContent = Array.prototype.slice.call(arguments).join(" ");
+            consoleContent.appendChild(div);
+            consoleContent.scrollTop = consoleContent.scrollHeight;
+            origLog.apply(console, arguments);
+        };
+        console.error = function() {
+            var div = document.createElement("div");
+            div.className = "console-line error";
+            div.textContent = "Error: " + Array.prototype.slice.call(arguments).join(" ");
+            consoleContent.appendChild(div);
+            consoleContent.scrollTop = consoleContent.scrollHeight;
+            origError.apply(console, arguments);
+        };
+        
+        var debounceTimer = null;
+        function debounce(func, delay) {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(func, delay);
         }
-    };
-
-    // App Init
-    document.addEventListener('DOMContentLoaded', function() {
-        UI.init();
-        UI.els.editor.value = DEFAULT_CODE;
-        UI.updateLines();
-        AutoUpdate.init();
-        UI.els.runBtn.addEventListener('click', function() {
-            AutoUpdate.run();
-            UI.showNotification('تم تشغيل الكود ✓');
+        
+        editor.value = DEFAULT_CODE;
+        updateLines();
+        
+        editor.addEventListener("input", function() {
+            updateLines();
+            debounce(updatePreview, 800);
         });
-        UI.els.resetBtn.addEventListener('click', function() {
-            if (confirm('هل تريد إعادة تعيين الكود؟')) {
-                UI.els.editor.value = DEFAULT_CODE;
-                UI.updateLines();
-                AutoUpdate.run();
-                UI.showNotification('تم إعادة تعيين الكود ✓');
-            }
+        
+        editor.addEventListener("scroll", function() {
+            lineNumbers.scrollTop = editor.scrollTop;
         });
-        document.addEventListener('keydown', function(e) {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        
+        editor.addEventListener("keydown", function(e) {
+            if (e.key === "Tab") {
                 e.preventDefault();
-                AutoUpdate.run();
-                UI.showNotification('تم تشغيل الكود ✓');
+                var s = this.selectionStart;
+                var en = this.selectionEnd;
+                this.value = this.value.substring(0, s) + "  " + this.value.substring(en);
+                this.selectionStart = this.selectionEnd = s + 2;
+                updateLines();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                e.preventDefault();
+                updatePreview();
+                showNotification("تم تشغيل الكود ✓");
             }
         });
-        setTimeout(function() { AutoUpdate.run(); }, 100);
-    });
-})();
-</script>
+        
+        document.getElementById("runBtn").addEventListener("click", function() {
+            updatePreview();
+            showNotification("تم تشغيل الكود ✓");
+        });
+        
+        document.getElementById("resetBtn").addEventListener("click", function() {
+            if (confirm("هل تريد إعادة تعيين الكود؟")) {
+                editor.value = DEFAULT_CODE;
+                updateLines();
+                updatePreview();
+                showNotification("تم إعادة تعيين الكود ✓");
+            }
+        });
+        
+        document.getElementById("errorClose").addEventListener("click", hideError);
+        
+        document.getElementById("consoleToggle").addEventListener("click", function() {
+            document.getElementById("consolePanel").classList.toggle("visible");
+        });
+        
+        document.getElementById("consoleClose").addEventListener("click", function() {
+            document.getElementById("consolePanel").classList.remove("visible");
+        });
+        
+        // Resizer
+        var resizer = document.getElementById("resizer");
+        var editorPanel = document.getElementById("editorPanel");
+        var previewPanel = document.getElementById("previewPanel");
+        var isResizing = false;
+        
+        resizer.addEventListener("mousedown", function() {
+            isResizing = true;
+            document.body.style.cursor = "col-resize";
+        });
+        
+        document.addEventListener("mousemove", function(e) {
+            if (!isResizing) return;
+            var container = document.querySelector(".workspace");
+            var rect = container.getBoundingClientRect();
+            var pct = ((e.clientX - rect.left) / rect.width) * 100;
+            if (pct > 20 && pct < 80) {
+                editorPanel.style.flex = "0 0 " + pct + "%";
+                previewPanel.style.flex = "0 0 " + (100 - pct) + "%";
+            }
+        });
+        
+        document.addEventListener("mouseup", function() {
+            isResizing = false;
+            document.body.style.cursor = "";
+        });
+        
+        setTimeout(updatePreview, 100);
+        
+        window.onerror = function(msg) {
+            showError(msg);
+            return true;
+        };
+    </script>
 </body>
 </html>
