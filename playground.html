@@ -431,12 +431,14 @@
             codeTypeEl.textContent = type;
             
             try {
+                var sOpen = "<scr" + "ipt>";
+                var sClose = "</scr" + "ipt>";
                 var html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"></head><body style=\"margin:0\">";
                 html += "<div id=\"app\"></div>";
-                html += "<script>var app = document.getElementById(\"app\");";
+                html += sOpen + "var app = document.getElementById(\"app\");";
                 html += "try { " + code + " } catch(e) { ";
                 html += "app.innerHTML = '<div style=\"padding:20px;background:#fee2e2;border:1px solid #ef4444;border-radius:8px;font-family:system-ui\"><h2>Error</h2><p>' + e.message + '</p></div>'; console.error(e); ";
-                html += "}</" + "script></body></html>";
+                html += "}" + sClose + "</body></html>";
                 previewFrame.srcdoc = html;
                 
                 setTimeout(function() {
