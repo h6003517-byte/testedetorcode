@@ -162,7 +162,7 @@
                         <div class="spinner"></div>
                         <span>جاري التحميل...</span>
                     </div>
-                    <iframe class="preview-iframe" id="previewFrame" sandbox="allow-scripts allow-forms allow-modals allow-same-origin allow-top-navigation"></iframe>
+                    <iframe class="preview-iframe" id="previewFrame" sandbox="allow-scripts allow-forms allow-modals"></iframe>
                 </div>
             </div>
         </div>
@@ -208,22 +208,22 @@
         '// JavaScript Demo\n' +
         '\n' +
         'let count = 0;\n' +
+        'document.body.style.cssText = "text-align:center;padding:40px;font-family:system-ui;background:#1e1e2e;min-height:100vh;margin:0";\n' +
         '\n' +
-        'const counter = document.createElement("div");\n' +
-        'counter.style.cssText = "text-align:center;padding:40px;font-family:system-ui;";\n' +
-        'document.body.appendChild(counter);\n' +
+        'const container = document.createElement("div");\n' +
+        'document.body.appendChild(container);\n' +
         '\n' +
         'function updateDisplay() {\n' +
-        '  counter.innerHTML = `\n' +
-        '    <h1 style="color:#89b4fa;margin-bottom:20px;">CodeLab Counter</h1>\n' +
-        '    <div style="font-size:5rem;font-weight:bold;color:#fff;font-family:monospace;">${count}</div>\n' +
-        '    <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;">\n' +
-        '      <button onclick="decrement()" style="width:60px;height:60px;font-size:1.5rem;border-radius:12px;border:1px solid #f38ba8;background:rgba(243,139,168,0.2);color:#f38ba8;cursor:pointer;">−</button>\n' +
-        '      <button onclick="reset()" style="width:60px;height:60px;font-size:1.5rem;border-radius:12px;border:1px solid #6c7086;background:rgba(108,112,134,0.2);color:#6c7086;cursor:pointer;">↺</button>\n' +
-        '      <button onclick="increment()" style="width:60px;height:60px;font-size:1.5rem;border-radius:12px;border:1px solid #a6e3a1;background:rgba(166,227,161,0.2);color:#a6e3a1;cursor:pointer;">+</button>\n' +
+        '  container.innerHTML = "\n' +
+        '    <h1 style=\"color:#89b4fa;margin-bottom:20px;font-size:2rem;\">CodeLab Counter</h1>\n' +
+        '    <div style=\"font-size:5rem;font-weight:bold;color:#fff;font-family:monospace;margin:20px 0;\">' + count + '</div>\n' +
+        '    <div style=\"display:flex;gap:10px;justify-content:center;\">\n' +
+        '      <button onclick=\"decrement()\" style=\"width:60px;height:60px;font-size:1.5rem;border-radius:12px;border:1px solid #f38ba8;background:rgba(243,139,168,0.2);color:#f38ba8;cursor:pointer;\">-</button>\n' +
+        '      <button onclick=\"reset()\" style=\"width:60px;height:60px;font-size:1.5rem;border-radius:12px;border:1px solid #6c7086;background:rgba(108,112,134,0.2);color:#6c7086;cursor:pointer;\">Reset</button>\n' +
+        '      <button onclick=\"increment()\" style=\"width:60px;height:60px;font-size:1.5rem;border-radius:12px;border:1px solid #a6e3a1;background:rgba(166,227,161,0.2);color:#a6e3a1;cursor:pointer;\">+</button>\n' +
         '    </div>\n' +
-        '    <p style="color:#6c7086;margin-top:30px;">Plain JavaScript Demo</p>\n' +
-        '  `;\n' +
+        '    <p style=\"color:#6c7086;margin-top:30px;\">Plain JavaScript Demo</p>\n' +
+        '  ";\n' +
         '}\n' +
         '\n' +
         'function increment() {\n' +
@@ -244,7 +244,6 @@
         '  console.log("Counter reset");\n' +
         '}\n' +
         '\n' +
-        '// Initialize\n' +
         'updateDisplay();\n' +
         'console.log("CodeLab Playground initialized!");';
 
@@ -508,21 +507,18 @@
             var html = this.buildHTML(compiledCode, type);
             var iframe = UI.els.iframe;
             
-            // Create a blob URL to avoid sandbox restrictions
-            var blob = new Blob([html], { type: 'text/html' });
-            var url = URL.createObjectURL(blob);
-            
-            // Clean up old blob URL
-            if (iframe.src && iframe.src.startsWith('blob:')) {
-                URL.revokeObjectURL(iframe.src);
+            try {
+                iframe.srcdoc = html;
+            } catch(e) {
+                this.showError({ message: 'Failed to render preview' });
+                return;
             }
             
-            iframe.src = url;
-            
+            // Hide loading and set status
             setTimeout(function() {
                 UI.hideLoading();
                 UI.setStatus('ready', 'جاهز');
-            }, 500);
+            }, 1000);
         },
         buildHTML: function(code, type) {
             var ln = '\n';
@@ -532,29 +528,27 @@
                 html = html + '<script src="https://cdn.tailwindcss.com"></' + 'script>' + ln;
             }
             
+            // Error handlers
             html = html + '<script>' + ln + 
-                'window.onerror = function(m,s,l,c,e) { document.body.innerHTML = "<div style=\'padding:20px;background:#fee2e2;border:1px solid #ef4444;border-radius:8px;font-family:system-ui\'><h2>Error</h2><p>"+m+"</p></div>"; return true; };' + ln +
-                'window.onunhandledrejection = function(e) { document.body.innerHTML = "<div style=\'padding:20px;background:#fee2e2;border:1px solid #ef4444;border-radius:8px\'><h2>Promise Error</h2><p>"+e.reason+"</p></div>"; };' + ln +
-                '</' + 'script>' + ln + '</head>' + ln + '<body style="margin:0;font-family:system-ui;">' + ln + '<div id="root"></div>' + ln;
+                'window.onerror = function(msg, src, line) { ' +
+                'document.body.innerHTML = "<div style=\"padding:20px;background:#fee2e2;border:1px solid #ef4444;border-radius:8px;font-family:system-ui\"><h2>Runtime Error</h2><p>Line \"+line+\": \"+msg+\"</p></div>"; return true; };' + ln +
+                '</' + 'script>' + ln + '</head>' + ln;
             
+            html = html + '<body style="margin:0;font-family:system-ui;">';
+            
+            // For React code, show info message
             if (type.isReact || type.isJSX || type.isTSX) {
-                // Try loading React from CDN with inline fallback message
-                html = html + '<script src="https://unpkg.com/react@18.2.0/umd/react.development.min.js"></' + 'script>' + ln;
-                html = html + '<script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.min.js"></' + 'script>' + ln;
-                html = html + '<script>' + ln + 
-                    'if (typeof React !== "undefined" && typeof ReactDOM !== "undefined") {' + ln +
-                    'try {' + ln + code + ln + ln +
-                    'ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));' + ln +
-                    '} catch(e) { document.body.innerHTML = "<div style=\'padding:20px;background:#fee2e2;border:1px solid #ef4444;border-radius:8px\'><h2>React Error</h2><p>"+e.message+"</p></div>"; }' + ln +
-                    '} else {' + ln +
-                    'document.body.innerHTML = "<div style=\'padding:30px;font-family:system-ui;background:#1e1e2e;color:#cdd6f4;min-height:100vh\'><h2 style=\'color:#89b4fa\'>React Preview</h2><p style=\'color:#6c7086;margin:15px 0\'>React code detected. Loading React libraries...</p><p style=\'color:#f38ba8\'>Note: React may not load in sandboxed preview due to security restrictions.</p><p style=\'color:#a6e3a1;margin-top:15px\'>Try opening the full preview or use plain HTML/CSS/JS.</p></div>";' + ln +
-                    '}' + ln +
-                    '</' + 'script>' + ln;
+                html = html + '<div style="padding:20px;background:#1e1e2e;color:#cdd6f4;min-height:100vh;font-family:system-ui">' +
+                    '<h2 style="color:#89b4fa">React/JSX/TSX Code Detected</h2>' +
+                    '<p style="color:#6c7086;margin:15px 0">This playground supports HTML, CSS, and Plain JavaScript.</p>' +
+                    '<p style="color:#f9e2af">For React/JSX/TSX, external libraries cannot load due to sandbox security restrictions.</p>' +
+                    '<p style="color:#a6e3a1;margin-top:15px">Try using plain HTML/CSS/JavaScript instead!</p>' +
+                    '</div>';
             } else {
-                html = html + '<script>' + ln + code + ln + '</' + 'script>' + ln;
+                html = html + '<div id="root"></div><script>' + code + '</' + 'script>';
             }
             
-            html = html + '</body>' + ln + '</html>';
+            html = html + '</body></html>';
             
             return html;
         },
@@ -565,18 +559,19 @@
             var loc = err.line ? 'Line: ' + err.line : '';
             UI.showError('خطأ', msg, loc, err.stack || '');
             
-            var doc = UI.els.iframe.contentDocument;
-            doc.open();
-            doc.write('<' + '!DOCTYPE html>' + 
-                '<' + 'html><head><style>body{font-family:system-ui;padding:20px;background:#1e1e2e;color:#cdd6f4}</style></head>' +
-                '<body><div style="padding:20px;background:rgba(243,139,168,0.1);border:1px solid #f38ba8;border-radius:12px">' +
-                '<h2 style="color:#f38ba8">Compilation Error</h2><p style="font-family:monospace">'+this.escHtml(msg)+'</p></div></body></html>');
-            doc.close();
+            // Show error in preview
+            var iframe = UI.els.iframe;
+            var errorHTML = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;font-family:system-ui;padding:20px;background:#1e1e2e;color:#cdd6f4">' +
+                '<div style="padding:20px;background:rgba(243,139,168,0.1);border:1px solid #f38ba8;border-radius:12px">' +
+                '<h2 style="color:#f38ba8">Compilation Error</h2>' +
+                '<p style="font-family:monospace;color:#cdd6f4">' + this.escHtml(msg) + '</p>' +
+                '</div></body></html>';
+            try {
+                iframe.srcdoc = errorHTML;
+            } catch(e) {}
         },
         escHtml: function(t) {
-            var d = document.createElement('div');
-            d.textContent = t;
-            return d.innerHTML;
+            return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
     };
 
