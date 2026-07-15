@@ -3,566 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeLab - مختبر البرمجة التفاعلي</title>
+    <title>CodeLab</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --bg-primary: #1e1e2e;
-            --bg-secondary: #181825;
-            --bg-tertiary: #11111b;
-            --text-primary: #cdd6f4;
-            --text-secondary: #6c7086;
-            --accent-blue: #89b4fa;
-            --accent-green: #a6e3a1;
-            --accent-red: #f38ba8;
-            --accent-yellow: #f9e2af;
-            --border-color: #313244;
-        }
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .header {
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border-color);
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .logo-icon {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: var(--bg-primary);
-        }
-        .logo-text {
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-        .header-actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .status {
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            background: var(--bg-tertiary);
-            color: var(--accent-green);
-        }
-        .status.error { color: var(--accent-red); }
-        .status.compiling { color: var(--accent-yellow); }
-        .btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .btn-primary {
-            background: var(--accent-blue);
-            color: var(--bg-primary);
-        }
-        .btn-primary:hover { opacity: 0.9; }
-        .btn-secondary {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-        .btn-secondary:hover { background: var(--border-color); }
-        
-        .workspace {
-            flex: 1;
-            display: flex;
-            overflow: hidden;
-        }
-        .panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-        }
-        .panel-header {
-            background: var(--bg-secondary);
-            padding: 8px 16px;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .code-type {
-            background: var(--bg-tertiary);
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            color: var(--accent-blue);
-        }
-        .editor-container {
-            flex: 1;
-            display: flex;
-            background: var(--bg-tertiary);
-            overflow: hidden;
-        }
-        .line-numbers {
-            padding: 16px 8px;
-            background: var(--bg-secondary);
-            color: var(--text-secondary);
-            font-family: 'Consolas', monospace;
-            font-size: 14px;
-            line-height: 1.6;
-            text-align: right;
-            user-select: none;
-            min-width: 50px;
-            border-left: 1px solid var(--border-color);
-        }
-        .editor {
-            flex: 1;
-            padding: 16px;
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: none;
-            outline: none;
-            font-family: 'Consolas', monospace;
-            font-size: 14px;
-            line-height: 1.6;
-            resize: none;
-            direction: ltr;
-            text-align: left;
-            white-space: pre;
-            overflow: auto;
-        }
-        .preview-container {
-            flex: 1;
-            background: #fff;
-            position: relative;
-            overflow: hidden;
-        }
-        .preview-loading {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(30, 30, 46, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            color: var(--text-primary);
-            z-index: 10;
-        }
-        .preview-loading.hidden { display: none; }
-        .spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid var(--border-color);
-            border-top-color: var(--accent-blue);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .preview-iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: #fff;
-        }
-        
-        .error-box {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--accent-red);
-            border-radius: 12px;
-            padding: 16px;
-            z-index: 100;
-            display: none;
-        }
-        .error-box.visible { display: block; }
-        .error-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 12px;
-        }
-        .error-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--accent-red);
-            font-weight: 600;
-        }
-        .error-close {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
-        .error-content {
-            font-family: monospace;
-            font-size: 0.9rem;
-            color: var(--text-primary);
-            background: var(--bg-tertiary);
-            padding: 12px;
-            border-radius: 8px;
-            max-height: 200px;
-            overflow: auto;
-        }
-        
-        .notification {
-            position: fixed;
-            top: 70px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--accent-green);
-            color: var(--bg-primary);
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 500;
-            z-index: 200;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .notification.visible { opacity: 1; }
-        
-        .resizer {
-            width: 6px;
-            background: var(--border-color);
-            cursor: col-resize;
-            transition: background 0.2s;
-        }
-        .resizer:hover { background: var(--accent-blue); }
-        
-        .console-toggle {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            z-index: 50;
-        }
-        .console-panel {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 200px;
-            background: var(--bg-secondary);
-            border-top: 1px solid var(--border-color);
-            display: none;
-            flex-direction: column;
-            z-index: 100;
-        }
-        .console-panel.visible { display: flex; }
-        .console-header {
-            padding: 10px 16px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .console-content {
-            flex: 1;
-            overflow: auto;
-            padding: 12px;
-            font-family: monospace;
-            font-size: 13px;
-        }
-        .console-line {
-            padding: 4px 8px;
-            border-radius: 4px;
-            margin-bottom: 4px;
-        }
-        .console-line.error { background: rgba(243, 139, 168, 0.2); color: var(--accent-red); }
-        .console-line.warn { background: rgba(249, 226, 175, 0.2); color: var(--accent-yellow); }
-        .console-line.info { color: var(--accent-blue); }
-        
-        @media (max-width: 768px) {
-            .workspace { flex-direction: column; }
-            .panel { min-height: 300px; }
-            .resizer { width: 100%; height: 6px; cursor: row-resize; }
-        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--bg:#1e1e2e;--bg2:#181825;--bg3:#11111b;--text:#cdd6f4;--sub:#6c7086;--blue:#89b4fa;--green:#a6e3a1;--red:#f38ba8;--border:#313244}
+        body{font-family:system-ui;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+        .header{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+        .logo{display:flex;align-items:center;gap:10px}
+        .logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--blue),var(--green));border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:bold;color:var(--bg)}
+        .logo-text{font-size:1.2rem;font-weight:600}
+        .header-actions{display:flex;gap:10px}
+        .status{padding:6px 12px;border-radius:6px;font-size:0.85rem;background:var(--bg3);color:var(--green)}
+        .btn{padding:8px 16px;border:none;border-radius:8px;cursor:pointer;font-size:0.9rem;font-weight:500}
+        .btn-primary{background:var(--blue);color:var(--bg)}
+        .btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
+        .workspace{flex:1;display:flex;overflow:hidden}
+        .panel{flex:1;display:flex;flex-direction:column;min-width:0}
+        .panel-header{background:var(--bg2);padding:8px 16px;border-bottom:1px solid var(--border);font-size:0.85rem;color:var(--sub);display:flex;align-items:center;justify-content:space-between}
+        .editor-container{flex:1;display:flex;background:var(--bg3)}
+        .line-numbers{padding:16px 8px;background:var(--bg2);color:var(--sub);font-family:monospace;font-size:14px;line-height:1.6;text-align:right;user-select:none;min-width:50px;border-left:1px solid var(--border)}
+        .editor{flex:1;padding:16px;background:var(--bg3);color:var(--text);border:none;outline:none;font-family:monospace;font-size:14px;line-height:1.6;resize:none;direction:ltr;text-align:left;white-space:pre;overflow:auto}
+        .preview-container{flex:1;background:#fff;position:relative}
+        .preview-iframe{width:100%;height:100%;border:none;background:#fff}
+        .resizer{width:6px;background:var(--border);cursor:col-resize}
+        .resizer:hover{background:var(--blue)}
+        .error-box{position:fixed;bottom:20px;left:20px;right:20px;background:var(--bg2);border:1px solid var(--red);border-radius:12px;padding:16px;z-index:100;display:none}
+        .error-box.show{display:block}
+        .error-title{color:var(--red);font-weight:600;margin-bottom:8px}
+        .error-content{font-family:monospace;font-size:0.9rem;background:var(--bg3);padding:12px;border-radius:8px;max-height:200px;overflow:auto}
+        .notification{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:var(--green);color:var(--bg);padding:12px 24px;border-radius:8px;font-weight:500;z-index:200;opacity:0;transition:opacity 0.3s}
+        .notification.show{opacity:1}
     </style>
 </head>
 <body>
     <header class="header">
-        <div class="logo">
-            <div class="logo-icon">CL</div>
-            <span class="logo-text">CodeLab</span>
-        </div>
+        <div class="logo"><div class="logo-icon">CL</div><span class="logo-text">CodeLab</span></div>
         <div class="header-actions">
             <span class="status" id="status">جاهز</span>
             <button class="btn btn-secondary" id="resetBtn">إعادة تعيين</button>
             <button class="btn btn-primary" id="runBtn">تشغيل</button>
         </div>
     </header>
-    
     <div class="workspace">
-        <div class="panel" id="editorPanel">
-            <div class="panel-header">
-                <span>المحرر</span>
-                <span class="code-type" id="codeType">JavaScript</span>
-            </div>
+        <div class="panel">
+            <div class="panel-header">المحرر <span id="codeType" style="background:var(--bg3);padding:4px 10px;border-radius:4px;font-size:0.75rem;color:var(--blue)">JavaScript</span></div>
             <div class="editor-container">
                 <div class="line-numbers" id="lineNumbers">1</div>
                 <textarea class="editor" id="editor" spellcheck="false" placeholder="اكتب كودك هنا..."></textarea>
             </div>
         </div>
-        
         <div class="resizer" id="resizer"></div>
-        
-        <div class="panel" id="previewPanel">
-            <div class="panel-header" style="background:#fff;color:#333;">
-                <span>المعاينة</span>
-                <span class="code-type" id="previewType">Output</span>
-            </div>
-            <div class="preview-container">
-                <div class="preview-loading hidden" id="previewLoading">
-                    <div class="spinner"></div>
-                    <span>جاري التحميل...</span>
-                </div>
-                <iframe class="preview-iframe" id="previewFrame" sandbox="allow-scripts allow-forms allow-modals"></iframe>
-            </div>
+        <div class="panel">
+            <div class="panel-header" style="background:#fff;color:#333">المعاينة</div>
+            <div class="preview-container"><iframe class="preview-iframe" id="previewFrame" sandbox="allow-scripts allow-forms allow-modals"></iframe></div>
         </div>
     </div>
-    
-    <div class="error-box" id="errorBox">
-        <div class="error-header">
-            <div class="error-title">
-                <span>✕</span>
-                <span id="errorTitle">خطأ</span>
-            </div>
-            <button class="error-close" id="errorClose">×</button>
-        </div>
-        <div class="error-content" id="errorContent"></div>
-    </div>
-    
+    <div class="error-box" id="errorBox"><div class="error-title">خطأ</div><div class="error-content" id="errorContent"></div></div>
     <div class="notification" id="notification"></div>
-    
-    <button class="console-toggle" id="consoleToggle">Console</button>
-    <div class="console-panel" id="consolePanel">
-        <div class="console-header">
-            <span>Console Output</span>
-            <button class="error-close" id="consoleClose">×</button>
-        </div>
-        <div class="console-content" id="consoleContent"></div>
-    </div>
-    
     <script>
-        var DEFAULT_CODE = '// CodeLab Interactive Playground\n// JavaScript Demo\n\nvar count = 0;\n\ndocument.body.style.cssText = "text-align:center;padding:40px;font-family:system-ui;background:linear-gradient(135deg,#1e1e2e,#313244);min-height:100vh;margin:0";\n\nvar h1 = document.createElement("h1");\nh1.textContent = "CodeLab Counter";\nh1.style.cssText = "color:#89b4fa;font-size:2rem;margin-bottom:30px";\ndocument.body.appendChild(h1);\n\nvar display = document.createElement("div");\ndisplay.style.cssText = "font-size:6rem;font-weight:bold;color:#fff;font-family:monospace;margin:20px 0";\ndisplay.textContent = "0";\ndocument.body.appendChild(display);\n\nvar buttons = document.createElement("div");\nbuttons.style.cssText = "display:flex;gap:15px;justify-content:center";\ndocument.body.appendChild(buttons);\n\nfunction makeButton(text, color, onClick) {\n    var btn = document.createElement("button");\n    btn.textContent = text;\n    btn.style.cssText = "width:60px;height:60px;font-size:1.5rem;border-radius:12px;border:1px solid " + color + ";background:rgba(0,0,0,0.2);color:" + color + ";cursor:pointer";\n    btn.onclick = onClick;\n    return btn;\n}\n\nbuttons.appendChild(makeButton("-", "#f38ba8", function() { count--; update(); }));\nbuttons.appendChild(makeButton("0", "#6c7086", function() { count = 0; update(); }));\nbuttons.appendChild(makeButton("+", "#a6e3a1", function() { count++; update(); }));\n\nfunction update() {\n    display.textContent = count;\n    console.log("Count:", count);\n}\n\nupdate();\nconsole.log("CodeLab Playground initialized!");';
-        
-        var editor = document.getElementById("editor");
-        var lineNumbers = document.getElementById("lineNumbers");
-        var previewFrame = document.getElementById("previewFrame");
-        var previewLoading = document.getElementById("previewLoading");
-        var statusEl = document.getElementById("status");
-        var codeTypeEl = document.getElementById("codeType");
-        var errorBox = document.getElementById("errorBox");
-        var errorContent = document.getElementById("errorContent");
-        var notification = document.getElementById("notification");
-        var consoleContent = document.getElementById("consoleContent");
-        
-        function updateLines() {
-            var lines = editor.value.split("\n");
-            var nums = [];
-            for (var i = 1; i <= lines.length; i++) nums.push(i);
-            lineNumbers.textContent = nums.join("\n");
-        }
-        
-        function showNotification(msg) {
-            notification.textContent = msg;
-            notification.classList.add("visible");
-            setTimeout(function() { notification.classList.remove("visible"); }, 2000);
-        }
-        
-        function showError(msg) {
-            errorContent.textContent = msg;
-            errorBox.classList.add("visible");
-        }
-        
-        function hideError() {
-            errorBox.classList.remove("visible");
-        }
-        
-        function setStatus(text) {
-            statusEl.textContent = text;
-            statusEl.className = "status";
-        }
-        
-        function showLoading() { previewLoading.classList.remove("hidden"); }
-        function hideLoading() { previewLoading.classList.add("hidden"); }
-        
-        function updatePreview() {
-            hideError();
-            setStatus("جاري الترجمة...");
-            showLoading();
-            
-            var code = editor.value;
-            var type = "JavaScript";
-            if (code.indexOf("<html") !== -1 || code.indexOf("<div") !== -1) type = "HTML";
-            codeTypeEl.textContent = type;
-            
-            try {
-                var sOpen = "<scr" + "ipt>";
-                var sClose = "</scr" + "ipt>";
-                var html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"></head><body style=\"margin:0\">";
-                html += "<div id=\"app\"></div>";
-                html += sOpen + "var app = document.getElementById(\"app\");";
-                html += "try { " + code + " } catch(e) { ";
-                html += "app.innerHTML = '<div style=\"padding:20px;background:#fee2e2;border:1px solid #ef4444;border-radius:8px;font-family:system-ui\"><h2>Error</h2><p>' + e.message + '</p></div>'; console.error(e); ";
-                html += "}" + sClose + "</body></html>";
-                previewFrame.srcdoc = html;
-                
-                setTimeout(function() {
-                    hideLoading();
-                    setStatus("جاهز");
-                }, 100);
-            } catch (e) {
-                hideLoading();
-                setStatus("خطأ");
-                showError(e.message);
-            }
-        }
-        
-        // Console capture
-        var origLog = console.log;
-        var origError = console.error;
-        console.log = function() {
-            var div = document.createElement("div");
-            div.className = "console-line info";
-            div.textContent = Array.prototype.slice.call(arguments).join(" ");
-            consoleContent.appendChild(div);
-            consoleContent.scrollTop = consoleContent.scrollHeight;
-            origLog.apply(console, arguments);
-        };
-        console.error = function() {
-            var div = document.createElement("div");
-            div.className = "console-line error";
-            div.textContent = "Error: " + Array.prototype.slice.call(arguments).join(" ");
-            consoleContent.appendChild(div);
-            consoleContent.scrollTop = consoleContent.scrollHeight;
-            origError.apply(console, arguments);
-        };
-        
-        var debounceTimer = null;
-        function debounce(func, delay) {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(func, delay);
-        }
-        
+var DEFAULT_CODE = '// CodeLab Interactive Playground\n\nvar count = 0;\n\ndocument.body.style.cssText = "text-align:center;padding:40px;font-family:system-ui;background:linear-gradient(135deg,#1e1e2e,#313244);min-height:100vh;margin:0";\n\nvar h1 = document.createElement("h1");\nh1.textContent = "CodeLab Counter";\nh1.style.cssText = "color:#89b4fa;font-size:2rem;margin-bottom:30px";\ndocument.body.appendChild(h1);\n\nvar display = document.createElement("div");\ndisplay.style.cssText = "font-size:6rem;font-weight:bold;color:#fff;font-family:monospace;margin:20px 0";\ndisplay.textContent = "0";\ndocument.body.appendChild(display);\n\nvar buttons = document.createElement("div");\nbuttons.style.cssText = "display:flex;gap:15px;justify-content:center";\ndocument.body.appendChild(buttons);\n\nfunction makeButton(text, color, onClick) {\n    var btn = document.createElement("button");\n    btn.textContent = text;\n    btn.style.cssText = "width:60px;height:60px;font-size:1.5rem;border-radius:12px;border:1px solid " + color + ";background:rgba(0,0,0,0.2);color:" + color + ";cursor:pointer";\n    btn.onclick = onClick;\n    return btn;\n}\n\nbuttons.appendChild(makeButton("-", "#f38ba8", function() { count--; update(); }));\nbuttons.appendChild(makeButton("0", "#6c7086", function() { count = 0; update(); }));\nbuttons.appendChild(makeButton("+", "#a6e3a1", function() { count++; update(); }));\n\nfunction update() {\n    display.textContent = count;\n    console.log("Count:", count);\n}\n\nupdate();\nconsole.log("CodeLab Playground initialized!");';
+
+var editor = document.getElementById("editor");
+var lineNumbers = document.getElementById("lineNumbers");
+var previewFrame = document.getElementById("previewFrame");
+var statusEl = document.getElementById("status");
+var codeTypeEl = document.getElementById("codeType");
+var errorBox = document.getElementById("errorBox");
+var errorContent = document.getElementById("errorContent");
+var notification = document.getElementById("notification");
+
+function updateLines() {
+    var lines = editor.value.split("\n");
+    var nums = [];
+    for (var i = 1; i <= lines.length; i++) nums.push(i);
+    lineNumbers.textContent = nums.join("\n");
+}
+
+function showNotification(msg) {
+    notification.textContent = msg;
+    notification.classList.add("show");
+    setTimeout(function() { notification.classList.remove("show"); }, 2000);
+}
+
+function showError(msg) {
+    errorContent.textContent = msg;
+    errorBox.classList.add("show");
+}
+
+function hideError() { errorBox.classList.remove("show"); }
+function setStatus(text) { statusEl.textContent = text; }
+
+function updatePreview() {
+    hideError();
+    setStatus("جاري الترجمة...");
+    var code = editor.value;
+    codeTypeEl.textContent = code.includes("<html") || code.includes("<div") ? "HTML" : "JavaScript";
+    
+    try {
+        var sc1 = "<sc" + "ript>";
+        var sc2 = "</sc" + "ript>";
+        var html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"></head><body style=\"margin:0\">";
+        html += "<div id=\"app\"></div>";
+        html += sc1 + "var app=document.getElementById('app');";
+        html += "try{" + code + "}catch(e){app.innerHTML='<div style=\"padding:20px;background:#fee2e2;border:1px solid #ef4444;border-radius:8px\"><h2>Error</h2><p>'+e.message+'</p></div>'}";
+        html += sc2 + "</body></html>";
+        previewFrame.srcdoc = html;
+        setStatus("جاهز");
+    } catch (e) {
+        setStatus("خطأ");
+        showError(e.message);
+    }
+}
+
+var debounceTimer = null;
+function debounce(func, delay) { clearTimeout(debounceTimer); debounceTimer = setTimeout(func, delay); }
+
+editor.value = DEFAULT_CODE;
+updateLines();
+
+editor.addEventListener("input", function() { updateLines(); debounce(updatePreview, 800); });
+editor.addEventListener("scroll", function() { lineNumbers.scrollTop = editor.scrollTop; });
+
+editor.addEventListener("keydown", function(e) {
+    if (e.key === "Tab") {
+        e.preventDefault();
+        var s = this.selectionStart;
+        var en = this.selectionEnd;
+        this.value = this.value.substring(0, s) + "  " + this.value.substring(en);
+        this.selectionStart = this.selectionEnd = s + 2;
+        updateLines();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        updatePreview();
+        showNotification("تم تشغيل الكود ✓");
+    }
+});
+
+document.getElementById("runBtn").addEventListener("click", function() { updatePreview(); showNotification("تم تشغيل الكود ✓"); });
+
+document.getElementById("resetBtn").addEventListener("click", function() {
+    if (confirm("هل تريد إعادة تعيين الكود؟")) {
         editor.value = DEFAULT_CODE;
         updateLines();
-        
-        editor.addEventListener("input", function() {
-            updateLines();
-            debounce(updatePreview, 800);
-        });
-        
-        editor.addEventListener("scroll", function() {
-            lineNumbers.scrollTop = editor.scrollTop;
-        });
-        
-        editor.addEventListener("keydown", function(e) {
-            if (e.key === "Tab") {
-                e.preventDefault();
-                var s = this.selectionStart;
-                var en = this.selectionEnd;
-                this.value = this.value.substring(0, s) + "  " + this.value.substring(en);
-                this.selectionStart = this.selectionEnd = s + 2;
-                updateLines();
-            }
-            if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-                e.preventDefault();
-                updatePreview();
-                showNotification("تم تشغيل الكود ✓");
-            }
-        });
-        
-        document.getElementById("runBtn").addEventListener("click", function() {
-            updatePreview();
-            showNotification("تم تشغيل الكود ✓");
-        });
-        
-        document.getElementById("resetBtn").addEventListener("click", function() {
-            if (confirm("هل تريد إعادة تعيين الكود؟")) {
-                editor.value = DEFAULT_CODE;
-                updateLines();
-                updatePreview();
-                showNotification("تم إعادة تعيين الكود ✓");
-            }
-        });
-        
-        document.getElementById("errorClose").addEventListener("click", hideError);
-        
-        document.getElementById("consoleToggle").addEventListener("click", function() {
-            document.getElementById("consolePanel").classList.toggle("visible");
-        });
-        
-        document.getElementById("consoleClose").addEventListener("click", function() {
-            document.getElementById("consolePanel").classList.remove("visible");
-        });
-        
-        // Resizer
-        var resizer = document.getElementById("resizer");
-        var editorPanel = document.getElementById("editorPanel");
-        var previewPanel = document.getElementById("previewPanel");
-        var isResizing = false;
-        
-        resizer.addEventListener("mousedown", function() {
-            isResizing = true;
-            document.body.style.cursor = "col-resize";
-        });
-        
-        document.addEventListener("mousemove", function(e) {
-            if (!isResizing) return;
-            var container = document.querySelector(".workspace");
-            var rect = container.getBoundingClientRect();
-            var pct = ((e.clientX - rect.left) / rect.width) * 100;
-            if (pct > 20 && pct < 80) {
-                editorPanel.style.flex = "0 0 " + pct + "%";
-                previewPanel.style.flex = "0 0 " + (100 - pct) + "%";
-            }
-        });
-        
-        document.addEventListener("mouseup", function() {
-            isResizing = false;
-            document.body.style.cursor = "";
-        });
-        
-        setTimeout(updatePreview, 100);
-        
-        window.onerror = function(msg) {
-            showError(msg);
-            return true;
-        };
+        updatePreview();
+        showNotification("تم إعادة تعيين الكود ✓");
+    }
+});
+
+var resizer = document.getElementById("resizer");
+var editorPanel = document.querySelector(".panel:first-child");
+var previewPanel = document.querySelector(".panel:last-child");
+var isResizing = false;
+
+resizer.addEventListener("mousedown", function() { isResizing = true; document.body.style.cursor = "col-resize"; });
+
+document.addEventListener("mousemove", function(e) {
+    if (!isResizing) return;
+    var container = document.querySelector(".workspace");
+    var rect = container.getBoundingClientRect();
+    var pct = ((e.clientX - rect.left) / rect.width) * 100;
+    if (pct > 20 && pct < 80) {
+        editorPanel.style.flex = "0 0 " + pct + "%";
+        previewPanel.style.flex = "0 0 " + (100 - pct) + "%";
+    }
+});
+
+document.addEventListener("mouseup", function() { isResizing = false; document.body.style.cursor = ""; });
+
+setTimeout(updatePreview, 100);
     </script>
 </body>
 </html>
