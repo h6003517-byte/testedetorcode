@@ -521,31 +521,13 @@
             }, 1000);
         },
         buildHTML: function(code, type) {
-            var ln = '\n';
-            var html = '<!DOCTYPE html>' + ln + '<html lang="ar">' + ln + '<head>' + ln + '<meta charset="UTF-8">' + ln + '<meta name="viewport" content="width=device-width, initial-scale=1.0">' + ln;
+            var html = '<!DOCTYPE html><html lang="ar"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body style="margin:0;font-family:system-ui;">';
             
-            if (type.usesTailwind) {
-                html = html + '<script src="https://cdn.tailwindcss.com"></' + 'script>' + ln;
-            }
-            
-            // Error handlers
-            html = html + '<script>' + ln + 
-                'window.onerror = function(msg, src, line) { ' +
-                'document.body.innerHTML = "<div style=\"padding:20px;background:#fee2e2;border:1px solid #ef4444;border-radius:8px;font-family:system-ui\"><h2>Runtime Error</h2><p>Line \"+line+\": \"+msg+\"</p></div>"; return true; };' + ln +
-                '</' + 'script>' + ln + '</head>' + ln;
-            
-            html = html + '<body style="margin:0;font-family:system-ui;">';
-            
-            // For React code, show info message
             if (type.isReact || type.isJSX || type.isTSX) {
-                html = html + '<div style="padding:20px;background:#1e1e2e;color:#cdd6f4;min-height:100vh;font-family:system-ui">' +
-                    '<h2 style="color:#89b4fa">React/JSX/TSX Code Detected</h2>' +
-                    '<p style="color:#6c7086;margin:15px 0">This playground supports HTML, CSS, and Plain JavaScript.</p>' +
-                    '<p style="color:#f9e2af">For React/JSX/TSX, external libraries cannot load due to sandbox security restrictions.</p>' +
-                    '<p style="color:#a6e3a1;margin-top:15px">Try using plain HTML/CSS/JavaScript instead!</p>' +
-                    '</div>';
+                html = html + '<div style="padding:20px;background:#1e1e2e;color:#cdd6f4;min-height:100vh"><h2 style="color:#89b4fa">React/JSX/TSX</h2><p>Use plain HTML/CSS/JavaScript for best results.</p></div>';
             } else {
-                html = html + '<div id="root"></div><script>' + code + '</' + 'script>';
+                html = html + '<div id="root"></div>';
+                html = html + '<script>' + code + '</script>';
             }
             
             html = html + '</body></html>';
@@ -556,16 +538,10 @@
             UI.hideLoading();
             UI.setStatus('error', 'خطأ');
             var msg = err.message || JSON.stringify(err);
-            var loc = err.line ? 'Line: ' + err.line : '';
-            UI.showError('خطأ', msg, loc, err.stack || '');
+            UI.showError('خطأ', msg, '', '');
             
-            // Show error in preview
             var iframe = UI.els.iframe;
-            var errorHTML = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;font-family:system-ui;padding:20px;background:#1e1e2e;color:#cdd6f4">' +
-                '<div style="padding:20px;background:rgba(243,139,168,0.1);border:1px solid #f38ba8;border-radius:12px">' +
-                '<h2 style="color:#f38ba8">Compilation Error</h2>' +
-                '<p style="font-family:monospace;color:#cdd6f4">' + this.escHtml(msg) + '</p>' +
-                '</div></body></html>';
+            var errorHTML = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;font-family:system-ui;padding:20px;background:#1e1e2e;color:#cdd6f4"><div style="padding:20px;background:rgba(243,139,168,0.1);border:1px solid #f38ba8;border-radius:12px"><h2 style="color:#f38ba8">Compilation Error</h2><p>' + this.escHtml(msg) + '</p></div></body></html>';
             try {
                 iframe.srcdoc = errorHTML;
             } catch(e) {}
